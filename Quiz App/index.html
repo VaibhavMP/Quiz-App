@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz App</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #eef2f5;
+      }
+      .quiz-container {
+        max-width: 700px;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        margin: auto;
+        margin-top: 50px;
+      }
+      #time-bar-container {
+        width: 100%;
+        height: 5px;
+        background: #ddd;
+        margin-bottom: 10px;
+      }
+      #time-bar {
+        width: 100%;
+        height: 5px;
+        background: #28a745;
+        transition: width 1s linear;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="text-center my-4">Quiz App</h2>
+      <div class="quiz-container border p-4 rounded shadow">
+        <div id="time-bar-container">
+          <div id="time-bar"></div>
+        </div>
+        <div id="timer" class="text-end text-danger fw-bold mb-3">
+          Time Left: <span id="time">60</span> sec
+        </div>
+        <form id="quizForm">
+          <div id="question-container"></div>
+          <div class="d-flex justify-content-between mt-3">
+            <button
+              type="button"
+              id="prevBtn"
+              class="btn btn-secondary"
+              disabled
+            >
+              Previous
+            </button>
+            <button type="button" id="nextBtn" class="btn btn-primary">
+              Next
+            </button>
+          </div>
+          <button
+            type="submit"
+            id="submitBtn"
+            class="btn btn-success btn-submit mt-3"
+          >
+            Submit
+          </button>
+        </form>
+        <div id="result" class="mt-3 text-center"></div>
+      </div>
+    </div>
+    <script>
+      const questions = [
+        {
+          question: "What is the capital of India?",
+          options: ["Delhi", "Mumbai", "Kolkata", "Chennai"],
+          answer: "Delhi",
+        },
+        {
+          question: "Who is the current Prime Minister of India?",
+          options: [
+            "Narendra Modi",
+            "Manmohan Singh",
+            "Rajiv Gandhi",
+            "Atal Bihari Vajpayee",
+          ],
+          answer: "Narendra Modi",
+        },
+        {
+          question: "What is the national animal of India?",
+          options: ["Tiger", "Lion", "Elephant", "Peacock"],
+          answer: "Tiger",
+        },
+        {
+          question: "Who is known as the Father of the Nation in India?",
+          options: [
+            "Mahatma Gandhi",
+            "Jawaharlal Nehru",
+            "Subhas Chandra Bose",
+            "Sardar Patel",
+          ],
+          answer: "Mahatma Gandhi",
+        },
+        {
+          question: "Which is the longest river in India?",
+          options: ["Ganga", "Yamuna", "Godavari", "Brahmaputra"],
+          answer: "Ganga",
+        },
+        {
+          question: "When did India gain independence?",
+          options: ["1942", "1947", "1950", "1960"],
+          answer: "1947",
+        },
+        {
+          question: "Which is the largest state in India by area?",
+          options: [
+            "Madhya Pradesh",
+            "Rajasthan",
+            "Uttar Pradesh",
+            "Maharashtra",
+          ],
+          answer: "Rajasthan",
+        },
+        {
+          question: "What is the official language of India?",
+          options: ["Hindi", "English", "Tamil", "Bengali"],
+          answer: "Hindi",
+        },
+        {
+          question: "Which city is known as the Silicon Valley of India?",
+          options: ["Bangalore", "Hyderabad", "Chennai", "Mumbai"],
+          answer: "Bangalore",
+        },
+        {
+          question: "Who was the first woman Prime Minister of India?",
+          options: [
+            "Indira Gandhi",
+            "Sonia Gandhi",
+            "Pratibha Patil",
+            "Sarojini Naidu",
+          ],
+          answer: "Indira Gandhi",
+        },
+      ];
+
+      let currentPage = 0;
+      const questionsPerPage = 3;
+      let timeLeft = 60;
+      let userAnswers = new Array(questions.length).fill(null);
+      let timerInterval;
+
+      function startTimer() {
+        timerInterval = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            document.getElementById("time").textContent = timeLeft;
+            document.getElementById("time-bar").style.width =
+              (timeLeft / 60) * 100 + "%";
+          } else {
+            clearInterval(timerInterval); // Stop the timer when it reaches 0
+          }
+        }, 1000);
+      }
+
+      function displayQuestions() {
+        const container = document.getElementById("question-container");
+        container.innerHTML = "";
+        const start = currentPage * questionsPerPage;
+        const end = start + questionsPerPage;
+        const paginatedQuestions = questions.slice(start, end);
+        paginatedQuestions.forEach((q, index) => {
+          container.innerHTML += `
+                    <div class="mb-3 p-3 border rounded">
+                        <label class="form-label fw-bold">${
+                          start + index + 1
+                        }. ${q.question}</label>
+                        ${q.options
+                          .map(
+                            (option) => `
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="q${
+                                  start + index
+                                }" value="${option}" ${
+                              userAnswers[start + index] === option
+                                ? "checked"
+                                : ""
+                            }>
+                                <label class="form-check-label">${option}</label>
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                `;
+        });
+        document.getElementById("prevBtn").disabled = currentPage === 0;
+        document.getElementById("nextBtn").disabled =
+          (currentPage + 1) * questionsPerPage >= questions.length;
+      }
+
+      document.getElementById("nextBtn").addEventListener("click", () => {
+        document
+          .querySelectorAll("input[type=radio]:checked")
+          .forEach((input) => {
+            let index = parseInt(input.name.substring(1));
+            userAnswers[index] = input.value;
+          });
+        currentPage++;
+        displayQuestions();
+      });
+
+      // Added functionality to handle the previous button
+      document.getElementById("prevBtn").addEventListener("click", () => {
+        document
+          .querySelectorAll("input[type=radio]:checked")
+          .forEach((input) => {
+            let index = parseInt(input.name.substring(1));
+            userAnswers[index] = input.value;
+          });
+        currentPage--;
+        displayQuestions();
+      });
+
+      document.getElementById("quizForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        document
+          .querySelectorAll("input[type=radio]:checked")
+          .forEach((input) => {
+            let index = parseInt(input.name.substring(1));
+            userAnswers[index] = input.value;
+          });
+        let score = userAnswers.filter(
+          (ans, idx) => ans === questions[idx].answer
+        ).length;
+        document.getElementById(
+          "result"
+        ).innerHTML = `<h3>Your Score: ${score}/${questions.length}</h3>`;
+        clearInterval(timerInterval); // Stop the timer on quiz submit
+      });
+
+      displayQuestions();
+      startTimer();
+    </script>
+  </body>
+</html>

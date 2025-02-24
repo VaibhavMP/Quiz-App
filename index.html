@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Quiz</title>
+  </head>
+  <body>
+    <div class="quiz-container">
+      <h2>What is the capital of France?</h2>
+
+      <!-- Options -->
+      <div class="answer-option" onclick="checkAnswer('Berlin')">Berlin</div>
+      <div class="answer-option" onclick="checkAnswer('Madrid')">Madrid</div>
+      <div class="answer-option" onclick="checkAnswer('Paris')">Paris</div>
+      <div class="answer-option" onclick="checkAnswer('Rome')">Rome</div>
+
+      <!-- Submit Button -->
+      <button id="submit-btn" onclick="showResult()">Submit</button>
+
+      <!-- Result -->
+      <div id="result"></div>
+    </div>
+
+    <script>
+      let selectedAnswer = "";
+
+      // Function to track selected answer
+      function checkAnswer(answer) {
+        selectedAnswer = answer;
+        // Enable submit button after an answer is selected
+        document.getElementById("submit-btn").disabled = false;
+      }
+
+      // Function to display result
+      function showResult() {
+        const correctAnswer = "Paris";
+        const resultDiv = document.getElementById("result");
+
+        if (selectedAnswer === correctAnswer) {
+          resultDiv.innerHTML = "Correct! The capital of France is Paris.";
+        } else {
+          resultDiv.innerHTML = "Incorrect. Try again!";
+        }
+
+        resultDiv.style.display = "block";
+        // Disable the submit button after answering
+        document.getElementById("submit-btn").disabled = true;
+      }
+    </script>
+  </body>
+</html>
